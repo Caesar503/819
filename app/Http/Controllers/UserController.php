@@ -17,7 +17,10 @@ class UserController extends Controller
         $arr = User::where('username',$username)->first()->toArray();
         if(!$arr)
         {
-            echo "查无此人!请输入正确的用户名或者密码！";
+            $respon = [
+                'error'=>5004,
+                'msg'=>'查无此人!请输入正确的用户名！'
+            ];
         }else{
 //            echo password_hash($pwd,PASSWORD_DEFAULT);
             if(password_verify($pwd,$arr['pass']))
@@ -27,11 +30,19 @@ class UserController extends Controller
                 $userToken = $this->getUSertoken();
                 Redis::set($key,$userToken);
                 Redis::expire($key,7*3600);
-                echo "欢迎登陆！";
+                $respon = [
+                    'error'=>0,
+                    'msg'=>'登陆成功！',
+                    'token'=>$userToken
+                ];
             }else{
-                echo "查无此人!请输入正确的用户名或者密码！";
+                $respon = [
+                    'error'=>5005,
+                    'msg'=>'查无此人!请输入正确的密码！'
+                ];
             }
         }
+        echo json_encode($respon);
     }
     //获取用户的token
     public function getUSertoken()
